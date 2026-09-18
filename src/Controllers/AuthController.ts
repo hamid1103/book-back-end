@@ -21,6 +21,8 @@ interface LoginBody {
  */
 const SignOps = {
     schema: {
+        summary: "Log in a user",
+        description: 'Log in with a username or email and password',
         body: {
             type: 'object',
             properties: {
@@ -28,6 +30,14 @@ const SignOps = {
                 password: {type: 'string'},
                 email: {
                     type: ['string', 'null'],
+                }
+            }
+        },
+        response: {
+            '2xx': {
+                type: 'object',
+                properties: {
+                    access_token: {type: 'string'},
                 }
             }
         }
@@ -40,6 +50,7 @@ const SignOps = {
  */
 const RegOps = {
     schema: {
+        summary: "Register a User",
         body: {
             type: 'object',
             properties: {
@@ -47,6 +58,14 @@ const RegOps = {
                 password: {type: 'string'},
                 email: {
                     type: 'string',
+                }
+            }
+        },
+        response: {
+            '2xx': {
+                type: 'object',
+                properties: {
+                    access_token: {type: 'string'},
                 }
             }
         }

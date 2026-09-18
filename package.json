@@ -27,5 +27,9 @@
     "nodemon": "^3.1.14",
     "typescript": "^5.5.3"
   },
-  "private": true
+  "private": true,
+  "allowScripts": {
+    "bcrypt@6.0.0": true,
+    "fsevents@2.3.3": true
+  }
 }

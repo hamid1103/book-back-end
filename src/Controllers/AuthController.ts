@@ -79,9 +79,6 @@ export default function AuthController(fastify: FastifyInstance) {
     })
 
     fastify.post<{ Body: LoginBody }>("/login", SignOps, async (request, reply) => {
-        if(!request.body.username && !request.body.email) {
-            throw new Error("Need at least one username or email");
-        }
         return await signIn(request.body.username, request.body.password, request.body.email)
     })
 }

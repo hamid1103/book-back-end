@@ -4,6 +4,7 @@ import User from "../Model/User";
 import bcrypt from "bcrypt";
 import * as jwt from 'jsonwebtoken';
 import {Op} from "sequelize";
+import BadRequestError from "../Types/Errors/BadRequestError";
 
 const SECRET_KEY = process.env.SECRETKEY;
 
@@ -12,7 +13,7 @@ export async function signIn(username: string | null | undefined, password: stri
     let user: User | null = null;
     if (!username) {
         if (!email) {
-            throw new Error("Email or Username is required");
+            throw new BadRequestError("Email or Username is required");
         }
         user = await User.findOne({where: {email: email}})
     }else{
@@ -52,6 +53,16 @@ export async function InterceptUser(token: string): Promise<{ userid: string, us
 export async function signUp(username: string, password: string, email:string): Promise<{ access_token: string }> {
     if(password == null) {
         throw new Error("Passwords don't match");
+    }
+
+    const existingUser = await User.findOne({ where: { userName: username } });
+    if (existingUser) {
+        throw new BadRequestError("Username already exists");
+    }
+
+    const existingEmail = await User.findOne({ where: { email: email } });
+    if (existingEmail) {
+        throw new BadRequestError("Email already exists");
     }
 
     const hash = bcrypt.hashSync(password, 10);

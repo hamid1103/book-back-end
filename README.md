@@ -23,5 +23,4 @@ cp .env.example .env
 
 Found while working on type-safety for `request.user`, not yet fixed:
 
-- **`User.id` type mismatch.** `src/Model/User.ts` declares `id: string` but the DB column is `DataTypes.INTEGER`. Doesn't break anything today (IDs only ever pass through opaquely, into the JWT `sub` and back out as `userid`), but is incorrect and could cause bugs if `user.id` is ever compared numerically.
-- **Unused import in `src/index.ts`.** `import User from "./Model/User"` (line 6) is dead code — harmless, but worth removing.
+- [Update: This is not 'unused'. It needs to be there for sequelize to initialize the model.] **Unused import in `src/index.ts`.** `import User from "./Model/User"` (line 6) is dead code — harmless, but worth removing.

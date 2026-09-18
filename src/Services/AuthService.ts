@@ -9,9 +9,18 @@ const SECRET_KEY = process.env.SECRETKEY;
 
 //returns the JWT for signing in or throws an error.
 export async function signIn(username: string | null | undefined, password: string, email?: string | null): Promise<{ access_token: string }> {
-    const user = await User.findOne({ where: {
-        [Op.or]: [{ userName: username}, {email: email}]
-        }});
+    let user: User | null = null;
+    if (!username) {
+        if (!email) {
+            throw new Error("Email or Username is required");
+        }
+        user = await User.findOne({where: {email: email}})
+    }else{
+        user = email ? await User.findOne({ where: {
+                [Op.or]: [{ userName: username}, {email: email}]
+            }}) : await User.findOne({ where: { userName: username } });
+    }
+
     if(!user) {
         throw new Error(`User ${username} not found. ${(email ? `Email ${email} not found` : "")}`);
     }

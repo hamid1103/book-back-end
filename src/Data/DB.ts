@@ -1,5 +1,6 @@
 import {Sequelize} from "sequelize";
 import {loadEnvFile} from "node:process";
+
 loadEnvFile();
 
 

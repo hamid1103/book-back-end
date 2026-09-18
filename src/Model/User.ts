@@ -2,7 +2,7 @@ import {DataTypes, Model} from "sequelize";
 import {sequelize} from "../Data/DB";
 
 class User extends Model {
-    declare id: string;
+    declare id: number;
     declare userName: string;
     declare email: string;
     declare password: string;

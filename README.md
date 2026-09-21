@@ -1,5 +1,10 @@
 # fastify-backend
 
+## requirements
+To run the server locally, you need:  
+- A mongoDB server
+- A postgres server
+
 ## .env setup
 
 Copy `.env` to `.env` and fill in real values before running the app:
@@ -16,6 +21,7 @@ cp .env.example .env
 | `DBNAME` | Postgres database name |
 | `DBURL` | Postgres host |
 | `DBPORT` | Postgres port |
+| `MONGOSTRING` | MongoDB connection String |
 
 `.env` is gitignored — never commit real secrets.
 

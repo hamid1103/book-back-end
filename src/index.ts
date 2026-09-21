@@ -1,9 +1,22 @@
 import Fastify from 'fastify'
+import * as mongoose from "mongoose";
+import {loadEnvFile} from "node:process";
+
+loadEnvFile();
+
+//ENV Vars
+const MONGOSTRING = process.env.MONGOSTRING;
+if (!MONGOSTRING)
+    throw new Error("MongoDB connection string required in .env");
+
 
 //Need to import for sequelize to register
 import {sequelize} from "./Data/DB";
+//Need to import these for Sequelize to run them
 import "./Model/User";
-import User from "./Model/User";
+import "./Model/Role";
+import "./Model/UserRole"
+
 import AuthController from "./Controllers/AuthController";
 import authPlugin from "./Plugins/Auth";
 import fastifyApiReference from "@scalar/fastify-api-reference";
@@ -12,7 +25,12 @@ import fastifySwagger from "@fastify/swagger";
 //Setup everything
 (async () => {
     console.log("Starting Setup");
-    await sequelize.sync({ alter: true });
+
+    console.log("Connecting to MongoDB");
+    await mongoose.connect(MONGOSTRING);
+
+    console.log("Syncing Sequelize to DB");
+    await sequelize.sync({alter: true});
 })()
 
 
@@ -40,10 +58,9 @@ fastify.register(fastifyApiReference, {
 // before those plugins have booted, so swagger would never see them.
 fastify.register(async (instance) => {
     instance.get('/', (req, res) => {
-        if (req.user)
-        {
+        if (req.user) {
             res.send({hello: req.user.username})
-        }else {
+        } else {
             res.send({hello: 'world'})
         }
     })
@@ -53,17 +70,17 @@ fastify.register(async (instance) => {
             description: 'Health check',
             tags: ['system'],
             response: {
-                200: { type: 'object', properties: { status: { type: 'string' } } }
+                200: {type: 'object', properties: {status: {type: 'string'}}}
             }
         }
-    }, async () => ({ status: 'ok' }))
+    }, async () => ({status: 'ok'}))
 
     //Register Custom Controller (JUST A TS FILE FUNCTION TO SPLIT STUFF UP)
     AuthController(instance);
 })
 
 // Run the server!
-fastify.listen({ port: 3000 }, function (err, address) {
+fastify.listen({port: 3000}, function (err, address) {
     if (err) {
         fastify.log.error(err)
         process.exit(1)

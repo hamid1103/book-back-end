@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon --watch src -e ts --exec \"npm run build && npm start\""
+    "dev": "nodemon --watch src -e ts --exec \"npm run build && npm start\"",
+    "import:books": "tsc && node dist/scripts/importBooks.js"
   },
   "dependencies": {
     "@fastify/swagger": "^9.8.1",
@@ -17,9 +18,11 @@
     "fastify": "^5.12.1",
     "fastify-plugin": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.10.1",
     "pg": "^8.23.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.8"
+    "sequelize": "^6.37.8",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

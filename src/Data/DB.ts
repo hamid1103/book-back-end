@@ -9,6 +9,7 @@ const DBNAME = process.env.DBNAME;
 const DBPASSWORD = process.env.DBPASSWORD;
 const DBURL = process.env.DBURL;
 const DBPORT = process.env.DBPORT;
+if (!DBUSER || !DBNAME || !DBPASSWORD || !DBURL || !DBPORT) throw new Error("ENV File incomplete.");
 
 let DBURI = `${DBURL}:${(DBPORT || 5432)}`;
 

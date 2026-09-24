@@ -1,7 +1,5 @@
 import {DataTypes, Model} from "sequelize";
 import {sequelize} from "../Data/DB";
-import User from "./User";
-import UserRole from "./UserRole";
 
 class Role extends Model {
     declare id: number;
@@ -19,7 +17,5 @@ Role.init({
         allowNull: false,
     }
 }, {sequelize, modelName: 'Role'});
-
-Role.belongsToMany(User, {through: UserRole})
 
 export default Role;

@@ -12,15 +12,14 @@ if (!MONGOSTRING)
 
 //Need to import for sequelize to register
 import {sequelize} from "./Data/DB";
-//Need to import these for Sequelize to run them
-import "./Model/User";
-import "./Model/Role";
-import "./Model/UserRole"
+//Need to import this for Sequelize to run them
+import "./Model/associations";
 
 import AuthController from "./Controllers/AuthController";
 import authPlugin from "./Plugins/Auth";
 import fastifyApiReference from "@scalar/fastify-api-reference";
 import fastifySwagger from "@fastify/swagger";
+import BookController from "./Controllers/BookController";
 
 //Setup everything
 (async () => {
@@ -77,6 +76,7 @@ fastify.register(async (instance) => {
 
     //Register Custom Controller (JUST A TS FILE FUNCTION TO SPLIT STUFF UP)
     AuthController(instance);
+    BookController(instance);
 })
 
 // Run the server!

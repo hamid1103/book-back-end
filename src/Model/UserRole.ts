@@ -1,7 +1,5 @@
 import {DataTypes, Model} from "sequelize";
 import {sequelize} from "../Data/DB";
-import User from "./User";
-import Role from "./Role";
 
 class UserRole extends Model {
     declare userId: number;
@@ -12,19 +10,11 @@ class UserRole extends Model {
 UserRole.init({
     userId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: User,
-            key: 'id'
-        }
+        allowNull: false
     },
     roleId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Role,
-            key: 'id'
-        },
+        allowNull: false
     },
     assignmentDate: {
         type: DataTypes.DATE,

@@ -20,6 +20,25 @@ import authPlugin from "./Plugins/Auth";
 import fastifyApiReference from "@scalar/fastify-api-reference";
 import fastifySwagger from "@fastify/swagger";
 import BookController from "./Controllers/BookController";
+import ReadingListController from "./Controllers/ReadingListController";
+import {MaterialType} from "./Model/Book";
+
+export const BookSchema = {
+    $id: "Book",
+    type: "object",
+    properties: {
+        _id: {type: "string"},
+        title: {type: "string"},
+        author: {type: "string"},
+        genre: {type: "array", items: {type: "string"}},
+        description: {type: "string"},
+        imageUrl: {type: "string"},
+        readingLevel: {type: "array", items: {type: "string"}},
+        tags: {type: "array", items: {type: "string"}},
+        materialType: {type: "string", enum: Object.values(MaterialType)},
+        sourceUrl: {type: "string"},
+    }
+} as const;
 
 //Setup everything
 (async () => {
@@ -56,6 +75,7 @@ fastify.register(fastifyApiReference, {
 // ready. Plain fastify.get/post calls at the top level run immediately,
 // before those plugins have booted, so swagger would never see them.
 fastify.register(async (instance) => {
+    instance.addSchema(BookSchema);
     instance.get('/', (req, res) => {
         if (req.user) {
             res.send({hello: req.user.username})
@@ -77,6 +97,7 @@ fastify.register(async (instance) => {
     //Register Custom Controller (JUST A TS FILE FUNCTION TO SPLIT STUFF UP)
     AuthController(instance);
     BookController(instance);
+    ReadingListController(instance);
 })
 
 // Run the server!

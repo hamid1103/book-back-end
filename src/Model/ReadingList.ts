@@ -2,6 +2,6 @@ import mongoose from "mongoose";
 
 export const readingListSchema = new mongoose.Schema({
     userID: Number,
-    book: [mongoose.Types.ObjectId]
+    book: [{ type: mongoose.Types.ObjectId, ref: "Book" }],
 });
 export const readingList = mongoose.model("ReadingList", readingListSchema);

@@ -15,7 +15,7 @@ export default function BookController(fastify: FastifyInstance) {
         const page = parsePositiveInt(qpage, 1);
 
         console.log("pageing query " + page + " "+ limit)
-        const books = await Book.find({}, 'title author _id')
+        const books = await Book.find({})
             .skip((page-1)*limit)
             .limit(limit).exec()
 

@@ -1,18 +1,55 @@
 import {FastifyInstance} from "fastify";
 import {Book} from "../Model/Book";
-function parsePositiveInt(value: string | null, fallback: number): number {
-    const parsed = Number.parseInt(value ?? '', 10);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+import NotFoundError from "../Types/Errors/NotFoundError";
+
+interface BooksQuery {
+    qpage: number;
+    qlimit: number;
 }
+
+const ErrorResponse = {
+    type: 'object',
+    properties: {
+        statusCode: {type: 'integer'},
+        error: {type: 'string'},
+        message: {type: 'string'},
+    }
+} as const;
+
 export default function BookController(fastify: FastifyInstance) {
-    fastify.get('/books', async (req, res) => {
-        // @ts-ignore
-        const {qpage, qlimit} = req.query
-        console.log(req.query);
-        console.log(qpage)
-        console.log(qlimit)
-        const limit = parsePositiveInt(qlimit, 10);
-        const page = parsePositiveInt(qpage, 1);
+    fastify.get<{Querystring: BooksQuery}>('/books', {
+        schema: {
+            summary: "Fetch books (paginated)",
+            description: "Fetch a page of books together with paging metadata",
+            tags: ['books'],
+            querystring: {
+                type: 'object',
+                properties: {
+                    qpage: {type: 'integer', minimum: 1, default: 1},
+                    qlimit: {type: 'integer', minimum: 1, default: 10},
+                }
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        meta: {
+                            type: 'object',
+                            properties: {
+                                total: {type: 'integer'},
+                                page: {type: 'integer'},
+                                limit: {type: 'integer'},
+                            }
+                        },
+                        books: {type: 'array', items: {$ref: "Book#"}},
+                    }
+                },
+                400: ErrorResponse,
+            }
+        }
+    }, async (req, res) => {
+        //Schema validates and applies the defaults, so these are always positive integers
+        const {qpage: page, qlimit: limit} = req.query;
 
         console.log("pageing query " + page + " "+ limit)
         const books = await Book.find({})
@@ -29,9 +66,31 @@ export default function BookController(fastify: FastifyInstance) {
         return {meta, books};
     })
 
-    fastify.get('/books/:bookId', async (req, res) => {
-        // @ts-ignore
+    fastify.get<{Params: {bookId: string}}>('/books/:bookId', {
+        schema: {
+            summary: "Fetch a single book",
+            description: "Fetch a single book by its id",
+            tags: ['books'],
+            params: {
+                type: 'object',
+                required: ['bookId'],
+                properties: {
+                    //MongoDB ObjectId
+                    bookId: {type: 'string', pattern: '^[0-9a-fA-F]{24}$'},
+                }
+            },
+            response: {
+                200: {$ref: "Book#"},
+                400: ErrorResponse,
+                404: ErrorResponse,
+            }
+        }
+    }, async (req, res) => {
         const { bookId } = req.params
-        return await Book.findById(bookId)
+        const book = await Book.findById(bookId)
+        if (!book) {
+            throw new NotFoundError("Book does not exist");
+        }
+        return book;
     })
 }

@@ -22,6 +22,7 @@ import fastifySwagger from "@fastify/swagger";
 import BookController from "./Controllers/BookController";
 import ReadingListController from "./Controllers/ReadingListController";
 import {MaterialType} from "./Model/Book";
+import BookAdviceController from "./Controllers/BookAdviceController";
 
 export const BookSchema = {
     $id: "Book",
@@ -98,6 +99,7 @@ fastify.register(async (instance) => {
     AuthController(instance);
     BookController(instance);
     ReadingListController(instance);
+    BookAdviceController(instance);
 })
 
 // Run the server!

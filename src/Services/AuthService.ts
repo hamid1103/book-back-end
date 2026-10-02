@@ -7,6 +7,7 @@ import {Op} from "sequelize";
 import BadRequestError from "../Types/Errors/BadRequestError";
 
 const SECRET_KEY = process.env.SECRETKEY;
+const TOKEN_EXPIRY = "1d";
 
 //returns the JWT for signing in or throws an error.
 export async function signIn(username: string | null | undefined, password: string, email?: string | null): Promise<{ access_token: string }> {
@@ -35,7 +36,7 @@ export async function signIn(username: string | null | undefined, password: stri
     }
     console.log(payload);
     return {
-        access_token: jwt.sign(payload, SECRET_KEY)
+        access_token: jwt.sign(payload, SECRET_KEY, {expiresIn: TOKEN_EXPIRY})
     }
 }
 
@@ -78,6 +79,6 @@ export async function signUp(username: string, password: string, email:string): 
     const payload = {sub: newUser.id, username: newUser.userName}
 
     return {
-        access_token: jwt.sign(payload, SECRET_KEY)
+        access_token: jwt.sign(payload, SECRET_KEY, {expiresIn: TOKEN_EXPIRY})
     }
 }

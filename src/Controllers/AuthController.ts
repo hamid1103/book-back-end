@@ -1,5 +1,6 @@
 import {FastifyInstance} from "fastify";
 import {signIn, signUp} from "../Services/AuthService";
+import User from "../Model/User";
 
 // Kept in sync with RegOps.schema.body below manually — not derived automatically.
 interface RegisterBody {
@@ -80,5 +81,14 @@ export default function AuthController(fastify: FastifyInstance) {
 
     fastify.post<{ Body: LoginBody }>("/login", SignOps, async (request, reply) => {
         return await signIn(request.body.username, request.body.password, request.body.email)
+    })
+
+    fastify.get("/me", async (request, reply) => {
+        if (!request.user) return reply.code(401).send({message:"Unauthorized"})
+        const user = await User.findByPk(request.user.userid, {
+            attributes: ['id', 'userName', 'email'],
+        });
+        if (!user) return reply.code(401).send({message: "Unauthorized"})
+        return user;
     })
 }

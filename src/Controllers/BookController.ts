@@ -66,6 +66,23 @@ export default function BookController(fastify: FastifyInstance) {
         return {meta, books};
     })
 
+    fastify.get('/books/genres', {
+        schema: {
+            summary: "Fetch all genres",
+            description: "Fetch every genre that is used by at least one book, sorted alphabetically",
+            tags: ['books'],
+            response: {
+                200: {type: 'array', items: {type: 'string'}},
+            }
+        }
+    }, async (req, res) => {
+        //distinct flattens the tags arrays and can be answered from the tags index
+        const tags = await Book.distinct("tags");
+        //Books with a null/missing tag make distinct return a null entry somewhere in the array, so drop anything that isn't a string
+        const genres = tags.filter((tag): tag is string => typeof tag === "string");
+        return genres.sort((a, b) => a.localeCompare(b));
+    })
+
     fastify.get<{Params: {bookId: string}}>('/books/:bookId', {
         schema: {
             summary: "Fetch a single book",

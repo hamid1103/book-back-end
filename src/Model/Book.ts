@@ -18,7 +18,7 @@ export enum ReadingLevel {
 export const bookSchema = new Schema({
     title: String,
     author: String,
-    genre: [String],
+    genre: {type: [String], index: true},
     description: String,
     imageUrl: String,
     readingLevel: [String],

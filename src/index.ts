@@ -23,6 +23,20 @@ import BookController from "./Controllers/BookController";
 import ReadingListController from "./Controllers/ReadingListController";
 import {MaterialType} from "./Model/Book";
 import BookAdviceController from "./Controllers/BookAdviceController";
+import ReadingProfileController from "./Controllers/ReadingProfileController";
+
+export const ReadingProfileSchema = {
+    $id: "ReadingProfile",
+    type: "object",
+    properties: {
+        _id: {type: "string"},
+        userID: {type: "integer"},
+        languageLevel: {type: "string"},
+        genre: {type: "array", items: {type: "string"}},
+        length: {type: "string"},
+        ReadingMotivation: {type: "string"},
+    }
+} as const;
 
 export const BookSchema = {
     $id: "Book",
@@ -77,7 +91,17 @@ fastify.register(fastifyApiReference, {
 // before those plugins have booted, so swagger would never see them.
 fastify.register(async (instance) => {
     instance.addSchema(BookSchema);
-    instance.get('/', (req, res) => {
+    instance.addSchema(ReadingProfileSchema);
+    instance.get('/', {
+        schema: {
+            summary: 'API Home',
+            description: "Doesn't do anything, but a nice way to check if your auth token is working.",
+            tags: ['system'],
+            response: {
+                200: {type: 'string'}
+            }
+        }
+    }, (req, res) => {
         if (req.user) {
             res.send({hello: req.user.username})
         } else {
@@ -100,6 +124,7 @@ fastify.register(async (instance) => {
     BookController(instance);
     ReadingListController(instance);
     BookAdviceController(instance);
+    ReadingProfileController(instance);
 })
 
 // Run the server!

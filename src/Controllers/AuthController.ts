@@ -1,6 +1,7 @@
 import {FastifyInstance} from "fastify";
 import {signIn, signUp} from "../Services/AuthService";
 import User from "../Model/User";
+import {getUserRole} from "../Services/RoleService";
 
 // Kept in sync with RegOps.schema.body below manually — not derived automatically.
 interface RegisterBody {
@@ -89,6 +90,11 @@ export default function AuthController(fastify: FastifyInstance) {
             attributes: ['id', 'userName', 'email'],
         });
         if (!user) return reply.code(401).send({message: "Unauthorized"})
-        return user;
+        return {
+            id: user.id,
+            userName: user.userName,
+            email: user.email,
+            role: await getUserRole(user.id),
+        };
     })
 }

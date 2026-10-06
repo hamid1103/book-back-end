@@ -1,10 +1,21 @@
 import {FastifyInstance} from "fastify";
-import {Book} from "../Model/Book";
+import {Book, MaterialType} from "../Model/Book";
 import NotFoundError from "../Types/Errors/NotFoundError";
 
 interface BooksQuery {
     qpage: number;
     qlimit: number;
+    title?: string;
+    author?: string;
+    genre?: string[];
+    tags?: string[];
+    readingLevel?: string[];
+    materialType?: MaterialType[];
+}
+
+//Escape user input so it is matched literally inside a RegExp
+function escapeRegex(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 const ErrorResponse = {
@@ -19,14 +30,20 @@ const ErrorResponse = {
 export default function BookController(fastify: FastifyInstance) {
     fastify.get<{Querystring: BooksQuery}>('/books', {
         schema: {
-            summary: "Fetch books (paginated)",
-            description: "Fetch a page of books together with paging metadata",
+            summary: "Fetch books (paginated, filterable)",
+            description: "Fetch a page of books together with paging metadata. title and author match case-insensitively on a substring; the array filters match books that have at least one of the given values, and different filters are combined with AND",
             tags: ['books'],
             querystring: {
                 type: 'object',
                 properties: {
                     qpage: {type: 'integer', minimum: 1, default: 1},
                     qlimit: {type: 'integer', minimum: 1, default: 10},
+                    title: {type: 'string', minLength: 1},
+                    author: {type: 'string', minLength: 1},
+                    genre: {type: 'array', items: {type: 'string'}},
+                    tags: {type: 'array', items: {type: 'string'}},
+                    readingLevel: {type: 'array', items: {type: 'string', enum: ['2F', '3F', '3F+']}},
+                    materialType: {type: 'array', items: {type: 'string', enum: Object.values(MaterialType)}},
                 }
             },
             response: {
@@ -49,14 +66,21 @@ export default function BookController(fastify: FastifyInstance) {
         }
     }, async (req, res) => {
         //Schema validates and applies the defaults, so these are always positive integers
-        const {qpage: page, qlimit: limit} = req.query;
+        const {qpage: page, qlimit: limit, title, author, genre, tags, readingLevel, materialType} = req.query;
 
-        console.log("pageing query " + page + " "+ limit)
-        const books = await Book.find({})
+        const filter: Record<string, unknown> = {};
+        if (title) filter.title = {$regex: escapeRegex(title), $options: 'i'};
+        if (author) filter.author = {$regex: escapeRegex(author), $options: 'i'};
+        if (genre?.length) filter.genre = {$in: genre};
+        if (tags?.length) filter.tags = {$in: tags};
+        if (readingLevel?.length) filter.readingLevel = {$in: readingLevel};
+        if (materialType?.length) filter.materialType = {$in: materialType};
+
+        const books = await Book.find(filter)
             .skip((page-1)*limit)
             .limit(limit).exec()
 
-        const totalBooks = await Book.countDocuments({})
+        const totalBooks = await Book.countDocuments(filter)
         let meta = {
             total: totalBooks,
             page: page,

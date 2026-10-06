@@ -61,6 +61,7 @@ erDiagram
         ObjectId _id PK
         Number userID FK "Users.id (PostgreSQL)"
         ObjectId[] book FK "books._id (ref: Book)"
+        Map status "book id -> NotRead, Reading, Read; missing = NotRead"
     }
     readingprofiles["readingprofiles (MongoDB)"] {
         ObjectId _id PK
@@ -78,7 +79,12 @@ erDiagram
   gives it a composite primary key (`userId`, `roleId`), so a user can have each role only once.
 - `StudentTeacher` links teachers to students. It is a many-to-many from `Users` to itself;
   `UserId` is the teacher and `StudentId` the student (Sequelize's default names for
-  `User.belongsToMany(User, {as: "Students", through: "StudentTeacher"})`).
+  `User.belongsToMany(User, {as: "Students", through: "StudentTeacher"})`). A student links
+  themselves to a teacher (`POST /teachers/:teacherId/link`); a teacher only sees the reading
+  lists of students linked to them.
+- Role titles are `student` and `teacher` (`RoleTitle` in `src/Services/RoleService.ts`). A user
+  without a role counts as a student; with several roles, the most recently assigned one wins.
+  Assign one with `npm run assign:role -- <username or email> <student|teacher>`.
 - Mongoose adds a `__v` version key to every document; it is left out of the diagram.
 - One reading list and one reading profile per user is the intended design (the API looks them up
   with `findOne`), but no unique index on `userID` enforces it yet.

@@ -24,6 +24,7 @@ import ReadingListController from "./Controllers/ReadingListController";
 import {MaterialType} from "./Model/Book";
 import BookAdviceController from "./Controllers/BookAdviceController";
 import ReadingProfileController from "./Controllers/ReadingProfileController";
+import StudentTeacherController from "./Controllers/StudentTeacherController";
 
 export const ReadingProfileSchema = {
     $id: "ReadingProfile",
@@ -125,6 +126,7 @@ fastify.register(async (instance) => {
     ReadingListController(instance);
     BookAdviceController(instance);
     ReadingProfileController(instance);
+    StudentTeacherController(instance);
 })
 
 // Run the server!

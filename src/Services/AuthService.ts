@@ -1,6 +1,10 @@
 import {loadEnvFile} from "node:process";
 loadEnvFile();
 import User from "../Model/User";
+import Role from "../Model/Role";
+import UserRole from "../Model/UserRole";
+import {sequelize} from "../Data/DB";
+import {RoleTitle} from "./RoleService";
 import bcrypt from "bcrypt";
 import * as jwt from 'jsonwebtoken';
 import {Op} from "sequelize";
@@ -67,10 +71,19 @@ export async function signUp(username: string, password: string, email:string): 
     }
 
     const hash = bcrypt.hashSync(password, 10);
-    const newUser = await User.create({
-        userName: username,
-        password: hash,
-        email: email,
+    //One transaction, so a failed role assignment doesn't leave a user without a role behind
+    const newUser = await sequelize.transaction(async (transaction) => {
+        const user = await User.create({
+            userName: username,
+            password: hash,
+            email: email,
+        }, {transaction});
+        const studentRole = await Role.findOne({where: {title: RoleTitle.Student}, transaction});
+        if (!studentRole) {
+            throw new Error("Student role is missing, roles have not been seeded");
+        }
+        await UserRole.create({userId: user.id, roleId: studentRole.id}, {transaction});
+        return user;
     });
     if(!SECRET_KEY){
         throw new Error("Secret key is missing");

@@ -82,9 +82,11 @@ erDiagram
   `User.belongsToMany(User, {as: "Students", through: "StudentTeacher"})`). A student links
   themselves to a teacher (`POST /teachers/:teacherId/link`); a teacher only sees the reading
   lists of students linked to them.
-- Role titles are `student` and `teacher` (`RoleTitle` in `src/Services/RoleService.ts`). A user
-  without a role counts as a student; with several roles, the most recently assigned one wins.
-  Assign one with `npm run assign:role -- <username or email> <student|teacher>`.
+- `Roles` is seeded on startup with `Student`, `Teacher` and `Admin` (`RoleTitle` / `seedRoles` in
+  `src/Services/RoleService.ts`); `title` is unique. `/me` returns the title lowercased
+  (`student`, `teacher`, `admin`). New accounts get the `Student` role on register. Older users
+  without a role still count as students; with several roles, the most recently assigned one wins.
+  Assign one with `npm run assign:role -- <username or email> <Student|Teacher|Admin>`.
 - Mongoose adds a `__v` version key to every document; it is left out of the diagram.
 - One reading list and one reading profile per user is the intended design (the API looks them up
   with `findOne`), but no unique index on `userID` enforces it yet.

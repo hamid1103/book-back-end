@@ -25,6 +25,8 @@ import {MaterialType} from "./Model/Book";
 import BookAdviceController from "./Controllers/BookAdviceController";
 import ReadingProfileController from "./Controllers/ReadingProfileController";
 import StudentTeacherController from "./Controllers/StudentTeacherController";
+import AdminController from "./Controllers/AdminController";
+import {seedRoles} from "./Services/RoleService";
 
 export const ReadingProfileSchema = {
     $id: "ReadingProfile",
@@ -65,6 +67,9 @@ export const BookSchema = {
 
     console.log("Syncing Sequelize to DB");
     await sequelize.sync({alter: true});
+
+    console.log("Seeding roles");
+    await seedRoles();
 })()
 
 
@@ -127,6 +132,7 @@ fastify.register(async (instance) => {
     BookAdviceController(instance);
     ReadingProfileController(instance);
     StudentTeacherController(instance);
+    AdminController(instance);
 })
 
 // Run the server!

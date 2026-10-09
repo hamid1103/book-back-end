@@ -1,23 +1,23 @@
 import {sequelize} from "../Data/DB";
-import {User, Role, UserRole} from "../Model/associations";
-import {RoleTitle} from "../Services/RoleService";
+import {User} from "../Model/associations";
+import {assignRole, parseRoleTitle, RoleTitle, seedRoles} from "../Services/RoleService";
 
-// Usage: npm run assign:role -- <username or email> <student|teacher>
-// There is no admin endpoint for roles yet, so teachers are made with this script.
+// Usage: npm run assign:role -- <username or email> <Student|Teacher|Admin>
+// Same as PUT /users/:userId/role, but works without an admin account (e.g. to make the first admin).
 async function main() {
-    const [login, title] = process.argv.slice(2);
-    const titles = Object.values(RoleTitle) as string[];
-    if (!login || !titles.includes(title)) {
-        throw new Error(`Usage: npm run assign:role -- <username or email> <${titles.join("|")}>`);
+    const [login, input] = process.argv.slice(2);
+    //Case-insensitive, so "teacher" works too
+    const title = parseRoleTitle(input);
+    if (!login || !title) {
+        throw new Error(`Usage: npm run assign:role -- <username or email> <${Object.values(RoleTitle).join("|")}>`);
     }
 
     await sequelize.sync({alter: true});
+    await seedRoles();
     const user = await User.findOne({where: login.includes("@") ? {email: login} : {userName: login}});
     if (!user) throw new Error(`User ${login} not found`);
 
-    const [role] = await Role.findOrCreate({where: {title}});
-    //Re-assigning bumps the assignmentDate, which makes it the user's active role
-    await UserRole.upsert({userId: user.id, roleId: role.id, assignmentDate: new Date()});
+    await assignRole(user.id, title);
     console.log(`${user.userName} is now a ${title}`);
 }
 

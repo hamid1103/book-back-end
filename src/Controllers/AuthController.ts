@@ -94,7 +94,6 @@ export default function AuthController(fastify: FastifyInstance) {
             id: user.id,
             userName: user.userName,
             email: user.email,
-            //The API uses lowercase role names, the DB stores them capitalized
             role: (await getUserRole(user.id))?.toLowerCase(),
         };
     })

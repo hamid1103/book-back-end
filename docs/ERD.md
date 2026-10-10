@@ -28,7 +28,7 @@ erDiagram
     }
     Roles["Roles (PostgreSQL)"] {
         INTEGER id PK "auto increment"
-        VARCHAR(255) title "NOT NULL"
+        VARCHAR(255) title "NOT NULL, UNIQUE"
         TIMESTAMPTZ createdAt "NOT NULL"
         TIMESTAMPTZ updatedAt "NOT NULL"
     }
@@ -49,7 +49,7 @@ erDiagram
         ObjectId _id PK
         String title
         String author
-        String[] genre
+        String[] genre "indexed"
         String description
         String imageUrl
         String[] readingLevel "2F, 3F, 3F+"

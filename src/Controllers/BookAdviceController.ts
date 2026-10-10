@@ -28,7 +28,7 @@ export default function BookAdviceController(fastify: FastifyInstance) {
                 },
             }
         }
-    }, async (req, res) => {
+    }, async (req) => {
         const { amount } = req.query;
 
         const profile = req.user

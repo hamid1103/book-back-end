@@ -1,0 +1,8 @@
+const path = require("path");
+
+//Points sequelize-cli at db/ instead of its default config/, models/, migrations/ and seeders/ folders
+module.exports = {
+    config: path.resolve("db", "config.js"),
+    "migrations-path": path.resolve("db", "migrations"),
+    "seeders-path": path.resolve("db", "seeders"),
+};

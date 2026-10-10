@@ -64,7 +64,7 @@ export default function BookController(fastify: FastifyInstance) {
                 400: ErrorResponse,
             }
         }
-    }, async (req, res) => {
+    }, async (req) => {
         //Schema validates and applies the defaults, so these are always positive integers
         const {qpage: page, qlimit: limit, title, author, genre, tags, readingLevel, materialType} = req.query;
 
@@ -81,7 +81,7 @@ export default function BookController(fastify: FastifyInstance) {
             .limit(limit).exec()
 
         const totalBooks = await Book.countDocuments(filter)
-        let meta = {
+        const meta = {
             total: totalBooks,
             page: page,
             limit: limit,
@@ -99,7 +99,7 @@ export default function BookController(fastify: FastifyInstance) {
                 200: {type: 'array', items: {type: 'string'}},
             }
         }
-    }, async (req, res) => {
+    }, async () => {
         //distinct flattens the tags arrays and can be answered from the tags index
         const tags = await Book.distinct("tags");
         //Books with a null/missing tag make distinct return a null entry somewhere in the array, so drop anything that isn't a string
@@ -126,7 +126,7 @@ export default function BookController(fastify: FastifyInstance) {
                 404: ErrorResponse,
             }
         }
-    }, async (req, res) => {
+    }, async (req) => {
         const { bookId } = req.params
         const book = await Book.findById(bookId)
         if (!book) {

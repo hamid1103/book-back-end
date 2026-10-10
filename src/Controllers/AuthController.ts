@@ -74,17 +74,45 @@ const RegOps = {
     }
 }
 
+/**
+ * @type {import('fastify').RouteShorthandOptions}
+ * @const
+ */
+const MeOps = {
+    schema: {
+        summary: "Get the current user",
+        description: 'Returns the profile and role of the currently logged in user',
+        response: {
+            '2xx': {
+                type: 'object',
+                properties: {
+                    id: {type: 'integer'},
+                    userName: {type: 'string'},
+                    email: {type: 'string'},
+                    role: {type: ['string', 'null']},
+                }
+            },
+            401: {
+                type: 'object',
+                properties: {
+                    message: {type: 'string'},
+                }
+            }
+        }
+    }
+}
+
 export default function AuthController(fastify: FastifyInstance) {
 
-    fastify.post<{ Body: RegisterBody }>("/register", RegOps, async (request, reply) => {
+    fastify.post<{ Body: RegisterBody }>("/register", RegOps, async (request) => {
         return await signUp(request.body.username, request.body.password, request.body.email)
     })
 
-    fastify.post<{ Body: LoginBody }>("/login", SignOps, async (request, reply) => {
+    fastify.post<{ Body: LoginBody }>("/login", SignOps, async (request) => {
         return await signIn(request.body.username, request.body.password, request.body.email)
     })
 
-    fastify.get("/me", async (request, reply) => {
+    fastify.get("/me", MeOps, async (request, reply) => {
         if (!request.user) return reply.code(401).send({message:"Unauthorized"})
         const user = await User.findByPk(request.user.userid, {
             attributes: ['id', 'userName', 'email'],

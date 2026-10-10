@@ -9,13 +9,14 @@ import bcrypt from "bcrypt";
 import * as jwt from 'jsonwebtoken';
 import {Op} from "sequelize";
 import BadRequestError from "../Types/Errors/BadRequestError";
+import UnauthorizedError from "../Types/Errors/UnauthorizedError";
 
 const SECRET_KEY = process.env.SECRETKEY;
 const TOKEN_EXPIRY = "1d";
 
 //returns the JWT for signing in or throws an error.
 export async function signIn(username: string | null | undefined, password: string, email?: string | null): Promise<{ access_token: string }> {
-    let user: User | null = null;
+    let user: User | null;
     if (!username) {
         if (!email) {
             throw new BadRequestError("Email or Username is required");
@@ -28,17 +29,16 @@ export async function signIn(username: string | null | undefined, password: stri
     }
 
     if(!user) {
-        throw new Error(`User ${username} not found. ${(email ? `Email ${email} not found` : "")}`);
+        throw new UnauthorizedError("Details don't match.");
     }
-    let compareResult = await bcrypt.compare(password, user!.password);
+    const compareResult = await bcrypt.compare(password, user!.password);
     if (!compareResult) {
-        throw new Error("Passwords don't match");
+        throw new UnauthorizedError("Details don't match.");
     }
     const payload = {sub: user.id, username: user.userName}
     if(!SECRET_KEY){
         throw new Error("Secret key is missing");
     }
-    console.log(payload);
     return {
         access_token: jwt.sign(payload, SECRET_KEY, {expiresIn: TOKEN_EXPIRY})
     }

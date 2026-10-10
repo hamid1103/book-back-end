@@ -11,7 +11,7 @@ const DBURL = process.env.DBURL;
 const DBPORT = process.env.DBPORT;
 if (!DBUSER || !DBNAME || !DBPASSWORD || !DBURL || !DBPORT) throw new Error("ENV File incomplete.");
 
-let DBURI = `${DBURL}:${(DBPORT || 5432)}`;
+const DBURI = `${DBURL}:${(DBPORT || 5432)}`;
 
 console.log(`postgres://${DBUSER}:${DBPASSWORD}@${DBURI}/${DBNAME}`)
 

@@ -11,7 +11,7 @@ if (!MONGOSTRING)
 
 
 //Need to import for sequelize to register
-import {sequelize} from "./Data/DB";
+import "./Data/DB";
 //Need to import this for Sequelize to run them
 import "./Model/associations";
 
@@ -65,9 +65,7 @@ export const BookSchema = {
     console.log("Connecting to MongoDB");
     await mongoose.connect(MONGOSTRING);
 
-    console.log("Syncing Sequelize to DB");
-    await sequelize.sync({alter: true});
-
+    //The schema is managed by migrations (npm run db:migrate), not sequelize.sync()
     console.log("Seeding roles");
     await seedRoles();
 })()
@@ -136,7 +134,7 @@ fastify.register(async (instance) => {
 })
 
 // Run the server!
-fastify.listen({port: 3000}, function (err, address) {
+fastify.listen({port: 3000}, function (err) {
     if (err) {
         fastify.log.error(err)
         process.exit(1)

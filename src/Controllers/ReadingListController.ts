@@ -1,4 +1,4 @@
-import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
+import {FastifyInstance} from "fastify";
 import UnauthorizedError from "../Types/Errors/UnauthorizedError";
 import BadRequestError from "../Types/Errors/BadRequestError";
 import {readingList, ReadingStatus} from "../Model/ReadingList";
@@ -36,7 +36,7 @@ export async function toResponse(list: ReadingListDocument, onlyId?: boolean) {
 export default function ReadingListController(fastify: FastifyInstance)
 {
     //This design goes against regular REST-API conventions... - Claude Review
-    //I DO NOT CARE! LESS CALLS! LESS CALLS! - Dev
+    //Corvo (Hamid): Don't matter. Saves on another call to create an empty reading list
     fastify.get<{
         Querystring: GetReadingListQuery,
     }>("/readinglist",
@@ -164,7 +164,7 @@ export default function ReadingListController(fastify: FastifyInstance)
             }
     }, async (req, res) => {
         if (!req.user) {
-            throw new UnauthorizedError("YOU AIN'T LOGGED IN YO!");
+            throw new UnauthorizedError("Invalid Authorization");
         }
         if (!isValidObjectId(req.body.book)) {
             throw new BadRequestError("Invalid book id");
@@ -175,7 +175,7 @@ export default function ReadingListController(fastify: FastifyInstance)
             throw new NotFoundError("Book does not exist");
         }
         //$addToSet skips duplicates, upsert creates the ReadingList if the user doesn't have one yet
-        let UserReadingList = await readingList.findOneAndUpdate(
+        const UserReadingList = await readingList.findOneAndUpdate(
             {userID: Number(req.user.userid)},
             {$addToSet: {book: req.body.book}},
             {new: true, upsert: true}

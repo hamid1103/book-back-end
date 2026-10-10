@@ -12,7 +12,6 @@ async function main() {
         throw new Error(`Usage: npm run assign:role -- <username or email> <${Object.values(RoleTitle).join("|")}>`);
     }
 
-    await sequelize.sync({alter: true});
     await seedRoles();
     const user = await User.findOne({where: login.includes("@") ? {email: login} : {userName: login}});
     if (!user) throw new Error(`User ${login} not found`);

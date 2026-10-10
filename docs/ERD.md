@@ -1,3 +1,5 @@
+> AI Generated Documentation made in conversation with user Hamid (Corvo). Used for tracking project progress and documentation purposses.
+
 # Entity Relationship Diagram
 
 The backend uses two databases:

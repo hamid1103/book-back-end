@@ -1,9 +1,33 @@
+> AI Generated Documentation made in conversation with user Hamid (Corvo). Used for tracking project progress and documentation purposses.
+
 # fastify-backend
 
 ## requirements
 To run the server locally, you need:  
 - A mongoDB server
 - A postgres server
+
+## Running locally
+
+```
+npm install
+cp .env.example .env    # then fill it in, see below
+npm run db:migrate      # create the Postgres tables
+npm run import:books    # first time only: loads the .xlsx catalogue into MongoDB
+npm run dev             # http://localhost:3000, rebuilds on every change
+```
+
+The API reference (OpenAPI, rendered by Scalar) is at `http://localhost:3000/reference`. New accounts are students; make the first admin with `npm run assign:role -- <username or email> Admin`.
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Build and start, restart on changes in `src/` (nodemon) |
+| `npm run build` | Compile TypeScript to `dist/` |
+| `npm start` | Start the compiled server |
+| `npm test` | Run the tests (see [Tests](#tests)) |
+| `npm run lint` | Lint the code (see [Linting](#linting)) |
+| `npm run import:books` | Replace the MongoDB catalogue with the contents of the .xlsx |
+| `npm run assign:role -- <user> <role>` | Give a user the Student, Teacher or Admin role |
 
 ## .env setup
 
@@ -45,7 +69,7 @@ fastify-backend/
 │   │   └── RoleService.ts
 │   ├── Model/                    # Data models
 │   │   ├── associations.ts       # Sequelize model relations (must be imported for the models to initialize)
-│   │   ├── User.ts, Role.ts, UserRole.ts          # Postgres (Sequelize)
+│   │   ├── User.ts, Role.ts, UserRole.ts          # Postgres (Sequelize); StudentTeacher is the join table defined in associations.ts
 │   │   └── Book.ts, ReadingList.ts, ReadingProfile.ts  # MongoDB (Mongoose)
 │   ├── Data/
 │   │   └── DB.ts                 # Postgres/Sequelize connection
@@ -128,6 +152,12 @@ Unused function parameters are allowed when they start with `_` (e.g. `(_req, re
 
 ## Known issues
 
-Found while working on type-safety for `request.user`, not yet fixed:
+Checked on 2026-10-10, not yet fixed:
 
-- ***Update by Corvo (Hamid): This is not 'unused'. It needs to be there for sequelize to initialize the model.*** **Unused import in `src/index.ts`.** `import "./Model/associations";` (line 6) is dead code — harmless, but worth removing.
+- **The database password is logged.** `src/Data/DB.ts` prints the full Postgres connection string, including the password, on startup.
+- **Startup race.** The MongoDB connection and `seedRoles()` in `src/index.ts` run in an async function that isn't awaited before `fastify.listen`, so the first requests can arrive before MongoDB is connected.
+- **`GET /` schema mismatch.** The route declares a `string` response but sends an object.
+- **No unique index on `userID`** in `readinglists` and `readingprofiles`, so nothing in the database enforces one list and one profile per user.
+- **`import:books` breaks reading lists.** It runs `Book.deleteMany({})` and re-inserts the catalogue, so every book gets a new `_id` and existing reading lists point to books that no longer exist.
+
+Note: `import "./Model/associations";` in `src/index.ts` looks unused, but it is required: importing it sets up the Sequelize associations.

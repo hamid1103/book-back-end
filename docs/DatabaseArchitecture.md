@@ -1,3 +1,5 @@
+> AI Generated Documentation made in conversation with user Hamid (Corvo). Used for tracking project progress and documentation purposses.
+
 # Database Architecture
 
 The backend uses two databases (see [ERD.md](ERD.md) for the full diagram):
@@ -51,9 +53,11 @@ needs two queries merged in code.
 
 ### Cons
 
-1. **Schema changes need migrations.** We currently use `sequelize.sync({alter: true})`, which is
-   fine for development but risky in production: it can drop or alter columns automatically. A
-   real deployment would need proper migrations.
+1. **Schema changes need migrations.** Every change to a Sequelize model also needs a migration in
+   `db/migrations/` (sequelize-cli, `npm run db:migrate`). That is extra work compared to MongoDB,
+   but it makes every schema change explicit and reversible. We replaced the earlier
+   `sequelize.sync({alter: true})` with migrations, because `sync` can drop or alter columns
+   automatically and kept adding duplicate unique constraints to `Roles`.
 2. **Less flexible.** Adding a field means changing the schema, not just writing a new key.
 3. **Harder to scale horizontally** than MongoDB. That doesn't matter at the scale of this project,
    but it is a general limitation.
@@ -154,4 +158,4 @@ Ways to reduce the cons above:
   so existing reading lists keep pointing to valid books.
 - Add `enum` validation to the MongoDB schemas for `languageLevel`, `length` and
   `ReadingMotivation`.
-- Replace `sequelize.sync({alter: true})` with migrations before running in production.
+- ~~Replace `sequelize.sync({alter: true})` with migrations.~~ Done: the schema is managed by sequelize-cli migrations.

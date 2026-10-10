@@ -12,7 +12,4 @@ const DBPORT = process.env.DBPORT;
 if (!DBUSER || !DBNAME || !DBPASSWORD || !DBURL || !DBPORT) throw new Error("ENV File incomplete.");
 
 const DBURI = `${DBURL}:${(DBPORT || 5432)}`;
-
-console.log(`postgres://${DBUSER}:${DBPASSWORD}@${DBURI}/${DBNAME}`)
-
 export const sequelize = new Sequelize(`postgres://${DBUSER}:${DBPASSWORD}@${DBURI}/${DBNAME}`);
